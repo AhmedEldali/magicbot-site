@@ -1,0 +1,48 @@
+name: Deploy static site to GitHub Pages
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: magicbot-site/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: magicbot-site
+
+      - name: Build static export
+        run: npm run build
+        working-directory: magicbot-site
+
+      - name: Include custom domain
+        run: |
+          if [ -f CNAME ]; then
+            cp CNAME magicbot-site/out/CNAME
+          fi
+
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./magicbot-site/out
