@@ -1,12 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "export",
   reactStrictMode: true,
-
-  // 🚨 Disable Turbopack font pipeline issues
-  experimental: {
-    optimizePackageImports: ["lucide-react"],
-  },
 };
 
 export default nextConfig;
